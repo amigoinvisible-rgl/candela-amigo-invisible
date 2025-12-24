@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎄 Armá el Arbolito - Candela</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #1a472a 0%, #2d5a3f 50%, #1a472a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 20px;
+        }
+
+        .snowflakes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .snowflake {
+            position: absolute;
+            top: -10px;
+            color: white;
+            font-size: 1.5rem;
+            animation: fall linear infinite;
+            opacity: 0.8;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(360deg); }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 10;
+            border: 4px solid #c41e3a;
+        }
+
+        h1 {
+            color: #c41e3a;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .intro {
+            color: #2d5a3f;
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .tree-container {
+            position: relative;
+            width: 280px;
+            height: 320px;
+        }
+
+        .tree {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 120px solid transparent;
+            border-right: 120px solid transparent;
+            border-bottom: 250px solid #2d5a3f;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+
+        .tree::before {
+            content: '';
+            position: absolute;
+            bottom: -280px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 50px;
+            background: #8B4513;
+            border-radius: 5px;
+        }
+
+        .star-spot {
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2.5rem;
+            cursor: pointer;
+            opacity: 0.3;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+
+        .star-spot.placed {
+            opacity: 1;
+            animation: starGlow 1s infinite alternate;
+        }
+
+        @keyframes starGlow {
+            from { filter: drop-shadow(0 0 5px gold); }
+            to { filter: drop-shadow(0 0 15px gold); }
+        }
+
+        .ornament-spots {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .ornament-spot {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 2px dashed rgba(255,255,255,0.5);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .ornament-spot:hover:not(.placed) {
+            border-color: white;
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .ornament-spot.placed {
+            border: none;
+            background: transparent;
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .ornaments-panel {
+            background: rgba(196, 30, 58, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+        }
+
+        .ornaments-panel h3 {
+            color: #c41e3a;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .ornaments-list {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .ornament-btn {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #c41e3a;
+            border-radius: 50%;
+            background: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ornament-btn:hover:not(.used) {
+            transform: scale(1.15);
+            box-shadow: 0 4px 15px rgba(196, 30, 58, 0.4);
+        }
+
+        .ornament-btn.selected {
+            border-color: #2d5a3f;
+            background: #e8f5e9;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #2d5a3f;
+        }
+
+        .ornament-btn.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 15px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #c41e3a, #ff6b6b);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .progress-text {
+            color: #2d5a3f;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .pista-container {
+            background: #fff9e6;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pista-container h4 {
+            color: #c41e3a;
+            margin-bottom: 8px;
+        }
+
+        .pista-container p {
+            color: #333;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            font-style: italic;
+        }
+
+        .mensaje-final {
+            display: none;
+            background: linear-gradient(135deg, #fff9e6 0%, #fff5d6 100%);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 15px;
+            animation: fadeIn 0.8s ease;
+            border: 2px solid #c41e3a;
+        }
+
+        .mensaje-final h2 {
+            color: #c41e3a;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .mensaje-final .texto {
+            color: #333;
+            font-size: 0.95rem;
+            line-height: 1.8;
+            text-align: left;
+        }
+
+        .mensaje-final .texto p {
+            margin-bottom: 12px;
+        }
+
+        .mensaje-final .firma {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+            color: #c41e3a;
+        }
+
+        .btn-reset {
+            display: none;
+            background: linear-gradient(135deg, #2d5a3f 0%, #1a472a 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            transform: scale(1.05);
+        }
+
+        .instrucciones {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 400px) {
+            .container { padding: 15px; }
+            .tree-container { width: 240px; height: 280px; }
+            .tree {
+                border-left: 100px solid transparent;
+                border-right: 100px solid transparent;
+                border-bottom: 210px solid #2d5a3f;
+            }
+            .tree::before { bottom: -240px; }
+            .ornament-btn { width: 45px; height: 45px; font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="snowflakes" id="snowflakes"></div>
+
+    <div class="container">
+        <h1>🎄 ¡Hola Candela!</h1>
+        <p class="intro">
+            Armá el arbolito navideño colocando los adornos.<br>
+            ¡Cada adorno revela una pista de tu amiga invisible!
+        </p>
+
+        <div class="game-area">
+            <div class="tree-container">
+                <div class="tree"></div>
+                <div class="star-spot" id="starSpot" onclick="placeStar()">⭐</div>
+                <div class="ornament-spots">
+                    <div class="ornament-spot" style="top: 80px; left: 95px;" data-index="0" onclick="placeOrnament(this)"></div>
+                    <div class="ornament-spot" style="top: 80px; left: 145px;" data-index="1" onclick="placeOrnament(this)"></div>
+                    <div class="ornament-spot" style="top: 140px; left: 65px;" data-index="2" onclick="placeOrnament(this)"></div>
+                    <div class="ornament-spot" style="top: 140px; left: 175px;" data-index="3" onclick="placeOrnament(this)"></div>
+                    <div class="ornament-spot" style="top: 200px; left: 45px;" data-index="4" onclick="placeOrnament(this)"></div>
+                    <div class="ornament-spot" style="top: 200px; left: 120px;" data-index="5" onclick="placeOrnament(this)"></div>
+                    <div class="ornament-spot" style="top: 200px; left: 195px;" data-index="6" onclick="placeOrnament(this)"></div>
+                </div>
+            </div>
+
+            <div class="ornaments-panel">
+                <h3>Adornos disponibles:</h3>
+                <div class="ornaments-list">
+                    <button class="ornament-btn" data-ornament="🔴" onclick="selectOrnament(this)">🔴</button>
+                    <button class="ornament-btn" data-ornament="🟡" onclick="selectOrnament(this)">🟡</button>
+                    <button class="ornament-btn" data-ornament="🔵" onclick="selectOrnament(this)">🔵</button>
+                    <button class="ornament-btn" data-ornament="🟣" onclick="selectOrnament(this)">🟣</button>
+                    <button class="ornament-btn" data-ornament="🎀" onclick="selectOrnament(this)">🎀</button>
+                    <button class="ornament-btn" data-ornament="🔔" onclick="selectOrnament(this)">🔔</button>
+                    <button class="ornament-btn" data-ornament="❄️" onclick="selectOrnament(this)">❄️</button>
+                </div>
+                <p class="instrucciones">1. Elegí un adorno → 2. Tocá un lugar en el árbol</p>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <p class="progress-text" id="progressText">0 de 4 pistas reveladas</p>
+            </div>
+        </div>
+
+        <div class="pista-container" id="pista1">
+            <h4>🎁 Pista #1</h4>
+            <p>Tu amiga invisible cocina para un regimiento... aunque los comensales sean 10, ella prepara como si vinieran 50. 🍳</p>
+        </div>
+
+        <div class="pista-container" id="pista2">
+            <h4>⭐ Pista #2</h4>
+            <p>Es fanática de los postres, de comprar "cositas", de limpiar (sí, en serio LE GUSTA), y de hacer regalos a todos. 🎀</p>
+        </div>
+
+        <div class="pista-container" id="pista3">
+            <h4>❄️ Pista #3</h4>
+            <p>Se acuerda de TODAS las fechas importantes... Bueno, casi todas. Porque este año te saludó UN DÍA TARDE para tu cumple, y todavía le pesa el alma. 😅</p>
+        </div>
+
+        <div class="mensaje-final" id="mensajeFinal">
+            <h2>🎄 ¡Arbolito completo! 🎄</h2>
+            <div class="texto">
+                <p><strong>Querida Candela:</strong></p>
+                <p>Tu amiga invisible es alguien que cocina para un regimiento aunque solo vengan diez personas... así que si sobra comida, ya sabés por dónde buscar.</p>
+                <p>Es fanática de los postres, de comprar "cositas", de limpiar (sí, en serio le gusta), y de hacer regalos a todos.</p>
+                <p>Se acuerda de TODAS las fechas importantes del año. Bueno... casi todas. Porque este año te saludó un día tarde para tu cumple, y todavía le pesa el alma.</p>
+                <p>Así que este regalo viene con mucho amor y un poquito de culpa.</p>
+                <p>Es alguien que te quiere como a una sobrina y admira tu dedicación a cada una de las cosas que hacés... y hasta cómo le encajaste a Chimú a tus viejos (jugada maestra, por cierto).</p>
+                <p class="firma">Con todo el cariño del mundo,<br>Tu amiga invisible 💝<br><br>🎁 ¡Felices Fiestas! 🎄</p>
+            </div>
+        </div>
+
+        <button class="btn-reset" id="btnReset" onclick="resetGame()">Volver a jugar</button>
+    </div>
+
+    <script>
+        let selectedOrnament = null;
+        let selectedBtn = null;
+        let placedCount = 0;
+        let starPlaced = false;
+        let pistasRevealed = 0;
+
+        const pistas = ['pista1', 'pista2', 'pista3'];
+
+        function selectOrnament(btn) {
+            if (btn.classList.contains('used')) return;
+            
+            if (selectedBtn) {
+                selectedBtn.classList.remove('selected');
+            }
+            
+            selectedBtn = btn;
+            selectedOrnament = btn.dataset.ornament;
+            btn.classList.add('selected');
+        }
+
+        function placeOrnament(spot) {
+            if (!selectedOrnament || spot.classList.contains('placed')) return;
+            
+            spot.textContent = selectedOrnament;
+            spot.classList.add('placed');
+            
+            selectedBtn.classList.remove('selected');
+            selectedBtn.classList.add('used');
+            selectedBtn = null;
+            selectedOrnament = null;
+            
+            placedCount++;
+            checkProgress();
+        }
+
+        function placeStar() {
+            if (starPlaced) return;
+            
+            const star = document.getElementById('starSpot');
+            star.classList.add('placed');
+            starPlaced = true;
+            
+            placedCount++;
+            checkProgress();
+        }
+
+        function checkProgress() {
+            // Revelar pistas cada 2 adornos (más o menos)
+            const newPistas = Math.min(Math.floor(placedCount / 2), 3);
+            
+            while (pistasRevealed < newPistas) {
+                document.getElementById(pistas[pistasRevealed]).style.display = 'block';
+                pistasRevealed++;
+            }
+            
+            // Actualizar barra de progreso
+            const progress = Math.min((pistasRevealed / 4) * 100, 75);
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = pistasRevealed + ' de 4 pistas reveladas';
+            
+            // Verificar si el árbol está completo (estrella + 7 adornos = 8)
+            if (placedCount >= 5 && starPlaced) {
+                setTimeout(showFinalMessage, 500);
+            }
+        }
+
+        function showFinalMessage() {
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('progressText').textContent = '¡Todas las pistas reveladas! 🎉';
+            document.getElementById('mensajeFinal').style.display = 'block';
+            document.getElementById('btnReset').style.display = 'inline-block';
+            
+            // Ocultar pistas individuales
+            pistas.forEach(p => document.getElementById(p).style.display = 'none');
+        }
+
+        function resetGame() {
+            // Resetear adornos
+            document.querySelectorAll('.ornament-spot').forEach(spot => {
+                spot.classList.remove('placed');
+                spot.textContent = '';
+            });
+            
+            // Resetear estrella
+            document.getElementById('starSpot').classList.remove('placed');
+            starPlaced = false;
+            
+            // Resetear botones
+            document.querySelectorAll('.ornament-btn').forEach(btn => {
+                btn.classList.remove('used', 'selected');
+            });
+            
+            // Resetear variables
+            selectedOrnament = null;
+            selectedBtn = null;
+            placedCount = 0;
+            pistasRevealed = 0;
+            
+            // Resetear UI
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('progressText').textContent = '0 de 4 pistas reveladas';
+            pistas.forEach(p => document.getElementById(p).style.display = 'none');
+            document.getElementById('mensajeFinal').style.display = 'none';
+            document.getElementById('btnReset').style.display = 'none';
+        }
+
+        // Crear copos de nieve
+        function createSnowflakes() {
+            const container = document.getElementById('snowflakes');
+            const snowflakeChars = ['❄', '❅', '❆', '✦', '✧'];
+            
+            for (let i = 0; i < 50; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.className = 'snowflake';
+                snowflake.textContent = snowflakeChars[Math.floor(Math.random() * snowflakeChars.length)];
+                snowflake.style.left = Math.random() * 100 + '%';
+                snowflake.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                snowflake.style.animationDelay = Math.random() * 5 + 's';
+                snowflake.style.fontSize = (Math.random() * 1 + 0.8) + 'rem';
+                container.appendChild(snowflake);
+            }
+        }
+
+        createSnowflakes();
+    </script>
+</body>
+</html>
